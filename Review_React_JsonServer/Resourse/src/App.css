@@ -1,0 +1,249 @@
+:root {
+  --bg: #f6f8fc;
+  --surface: #ffffff;
+  --surface-soft: #f8fafc;
+  --text: #172033;
+  --muted: #667085;
+  --primary: #4f46e5;
+  --primary-dark: #3730a3;
+  --success: #12b76a;
+  --danger: #ef4444;
+  --border: #e5e7eb;
+  --shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+  --radius: 22px;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top left, rgba(79, 70, 229, 0.12), transparent 34%), var(--bg);
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.app-shell {
+  min-height: 100vh;
+  padding: 28px 0 56px;
+}
+
+.page-container {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+}
+
+.hero-card,
+.content-card,
+.form-card {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(16px);
+}
+
+.hero-card {
+  padding: 34px;
+  margin-bottom: 24px;
+  overflow: hidden;
+  position: relative;
+}
+
+.hero-card::after {
+  content: "";
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  right: -80px;
+  top: -80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.2), rgba(18, 183, 106, 0.16));
+}
+
+.eyebrow {
+  color: var(--primary);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  margin-bottom: 8px;
+}
+
+.page-title {
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  margin: 0;
+}
+
+.page-subtitle {
+  color: var(--muted);
+  max-width: 660px;
+  margin: 12px 0 0;
+  line-height: 1.65;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 26px;
+}
+
+.stat-card {
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 18px;
+}
+
+.stat-card strong {
+  display: block;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.stat-card span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.btn-modern {
+  border: 0 !important;
+  border-radius: 999px !important;
+  padding: 11px 18px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 10px 20px rgba(79, 70, 229, 0.16);
+}
+
+.btn-primary.btn-modern {
+  background: var(--primary) !important;
+}
+
+.btn-primary.btn-modern:hover {
+  background: var(--primary-dark) !important;
+}
+
+.btn-soft {
+  background: #eef2ff !important;
+  color: var(--primary) !important;
+  box-shadow: none;
+}
+
+.btn-danger.btn-modern {
+  background: var(--danger) !important;
+  box-shadow: 0 10px 20px rgba(239, 68, 68, 0.16);
+}
+
+.content-card {
+  padding: 22px;
+  height: 100%;
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.section-heading h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.badge-count {
+  background: #eef2ff;
+  color: var(--primary);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.modern-table {
+  margin: 0;
+  vertical-align: middle;
+}
+
+.modern-table thead th {
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.modern-table tbody td {
+  border-color: var(--border) !important;
+  padding: 14px 10px;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 800;
+  background: linear-gradient(135deg, #4f46e5, #06b6d4);
+  margin-right: 10px;
+}
+
+.item-title {
+  font-weight: 750;
+}
+
+.item-muted {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.form-card {
+  width: min(680px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px;
+}
+
+.form-control,
+.form-select {
+  border-radius: 14px !important;
+  border-color: var(--border) !important;
+  padding: 12px 14px !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.12) !important;
+}
+
+.empty-state {
+  color: var(--muted);
+  text-align: center;
+  padding: 28px 12px;
+}
+
+@media (max-width: 768px) {
+  .hero-card,
+  .form-card {
+    padding: 24px;
+  }
+
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action-bar .btn {
+    width: 100%;
+  }
+}
