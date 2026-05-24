@@ -17,6 +17,9 @@ const server = http.createServer((req, res) => {
 
   const { method, url } = req;
 
+  // API: GET / - trả về message chào mừng
+  //Lấy ra danh sách user
+
   if (method === "GET" && url === "/") {
     res.end("Welcome to server");
   } else if (method === "GET" && url === "/user") {
@@ -53,7 +56,11 @@ const server = http.createServer((req, res) => {
   // Tìm user theo id
   else if (method === "GET" && url.startsWith("/user/")) {
     const id = url.split("/")[2];
-
+    // split("/") nghĩa là tách chuỗi theo dấu /.
+    // Từ "/user/SV01" sẽ được tách thành ["", "user", "SV01"].
+    // console.log(url);            // /user/SV01
+    // console.log(url.split("/")); // ["", "user", "SV01"]
+    // console.log(url.split("/")[2]); // SV01
     const user = data.find((item) => item.id === id);
     res.setHeader("content-type", "application/json");
     if (user) {
@@ -95,11 +102,12 @@ const server = http.createServer((req, res) => {
         res.statusCode = 200;
         res.setHeader("content-type", "application/json");
 
-        res.end(JSON.stringify({message: "Update success",user: data[index],}),);
-      } catch (e) {
-    res.statusCode = 400;
-        res.end(JSON.stringify({error: "Invalid JSON",}),
+        res.end(
+          JSON.stringify({ message: "Update success", user: data[index] }),
         );
+      } catch (e) {
+        res.statusCode = 400;
+        res.end(JSON.stringify({ error: "Invalid JSON" }));
       }
     });
   }
@@ -107,16 +115,17 @@ const server = http.createServer((req, res) => {
   // xóa user theo ID
   else if (method === "DELETE" && url.startsWith("/user/")) {
     const id = url.split("/")[2];
-
+    // split("/") nghĩa là tách chuỗi theo dấu /.
+    // console.log(url);            // /user/SV01
+    // console.log(url.split("/")); // ["", "user", "SV01"]
+    // console.log(url.split("/")[2]); // SV01
     // tìm vị trí user
     const index = data.findIndex((item) => item.id === id);
-
     if (index === -1) {
       res.statusCode = 404;
       res.setHeader("content-type", "application/json");
 
-      return res.end(JSON.stringify({error: "User not found",}),
-      );
+      return res.end(JSON.stringify({ error: "User not found" }));
     }
 
     // xóa user
@@ -125,7 +134,9 @@ const server = http.createServer((req, res) => {
     res.statusCode = 200;
     res.setHeader("content-type", "application/json");
 
-    res.end(JSON.stringify({message: "Delete success",user: deletedUser[0],}),);
+    res.end(
+      JSON.stringify({ message: "Delete success", user: deletedUser[0] }),
+    );
   } else {
     res.statusCode = 404;
     res.setHeader("content-type", "application/json");
