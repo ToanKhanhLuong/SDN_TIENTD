@@ -102,9 +102,8 @@ const server = http.createServer((req, res) => {
         res.statusCode = 200;
         res.setHeader("content-type", "application/json");
 
-        res.end(
-          JSON.stringify({ message: "Update success", user: data[index] }),
-        );
+        res.end(JSON.stringify({ message: "Update success", user: data[index] }),
+      );
       } catch (e) {
         res.statusCode = 400;
         res.end(JSON.stringify({ error: "Invalid JSON" }));
