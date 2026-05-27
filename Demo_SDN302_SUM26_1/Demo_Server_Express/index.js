@@ -112,8 +112,7 @@ server.post("/user", validateUserInput, (req, res) => {
   data.push(newUser);
 
   res.status(201).json({
-    message: "Insert user successfully",
-    data: newUser
+    message: "Insert user successfully", data: newUser
   });
 });
 
@@ -155,7 +154,6 @@ const checkUserId = (req, res, next) => {
       message: "User not found"
     });
   }
-
   next();
 };
 // PUT update user theo id
@@ -168,13 +166,9 @@ server.put("/user/:id", checkUserId, (req, res) => {
     ...data[index],
     ...req.body
   };
-  res.status(200).json({
-    message: "Update successfully",
-    data: data[index]
+  res.status(200).json({message: "Update successfully",data: data[index]
   });
 });
-
-
 
 
 
@@ -205,11 +199,7 @@ server.delete("/user/:id", checkUserId, (req, res) => {
   const index = data.findIndex(item => item.id === id);
 
   data.splice(index, 1);
-
-  res.status(200).json({
-    message: "Delete successfully",
-    data: data
-  });
+  res.status(200).json({message: "Delete successfully", data: data});
 });
 
 

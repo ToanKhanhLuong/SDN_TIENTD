@@ -27,6 +27,7 @@ const server = http.createServer((req, res) => {
     res.statusCode = 200;
     res.setHeader("content-type", "application/json");
     res.end(JSON.stringify(data));
+  
   }
 
   // Thêm mới user
