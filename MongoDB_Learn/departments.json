@@ -1,0 +1,20 @@
+[
+  {
+    "_id": {
+      "$oid": "65a100000000000000000001"
+    },
+    "depName": "Information Technology"
+  },
+  {
+    "_id": {
+      "$oid": "65a100000000000000000002"
+    },
+    "depName": "Business Assistant"
+  },
+  {
+    "_id": {
+      "$oid": "65a100000000000000000003"
+    },
+    "depName": "Graphic Design"
+  }
+]
