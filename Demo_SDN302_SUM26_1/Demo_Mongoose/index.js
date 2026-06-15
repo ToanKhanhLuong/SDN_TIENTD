@@ -48,6 +48,26 @@ const employeeSchema = new mongoose.Schema({
   },
 });
 
+const worksonSchema = new mongoose.Schema({
+  empId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Employee",
+    required: true,
+  },
+
+  proId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Project",
+    required: true,
+  },
+
+  workHours: {
+    type: Number,
+    required: true,
+  },
+});
+
+
 //Tạo model
 
 const Department = mongoose.model(
@@ -56,6 +76,8 @@ const Department = mongoose.model(
   "departments",
 );
 const Employee = mongoose.model("Employee", employeeSchema, "employees");
+
+const Workson = mongoose.model("Workson", worksonSchema, "worksons");
 
 // Tạo các API
 // 1. API: GET / - trả về message chào mừng
@@ -108,7 +130,7 @@ server.get("/employees1", async (req, res) => {
   res.status(200).json(data);
 });
 
-// API: GET /employees1/:min/:max
+// 5 API: GET /employees1/:min/:max
 // Lấy danh sách nhân viên có salary nằm trong khoảng [min, max]
 // Hiển thị: id, name, salary, dob, gender, depName
 
@@ -151,6 +173,33 @@ server.get("/employees1/:min/:max", async (req, res) => {
   res.status(200).json(data);
 });
 
+
+
+
+// 5.2 API: GET /employees1/:min/:max
+// Lấy danh sách nhân viên có salary nằm trong khoảng [min, max]
+// Hiển thị: id, name, salary, dob, gender, depName
+
+server.get("/employees2/:min/:max", async (req, res) => {
+  const min = Number(req.params.min);
+  const max = Number(req.params.max);
+ 
+  const data = await Employee.find({
+    salary :{$gte: min, $lte: max}
+  }). populate("depId", "depName");
+
+  const data2 = data.map((item) => ({
+    _id: item._id,
+    name: item.name,
+    salary: item.salary,
+    gender: item.gender?"Male":"Female",
+    dob: item.dob,
+    depName: item.depId.depName,
+  }));
+
+  res.status(200).json(data2);
+});
+
 //-----------------------------------------------------------------------------------
 
 //6. API: POST /department - thêm 1 department vào db
@@ -160,14 +209,13 @@ server.get("/employees1/:min/:max", async (req, res) => {
 const checkName = async (req, res, next) => {
   const name = req.body.depName;
 
-  const db = await connectDB();
-  const collection = db.collection("departments");
+ 
 
-  const data = await collection
+  const data = await Department
     .find({
       depName: name,
     })
-    .toArray();
+    
 
   if (data.length > 0) {
     return next("Name da ton tai !!");
@@ -177,15 +225,16 @@ const checkName = async (req, res, next) => {
 };
 server.post("/departments", checkName, async (req, res) => {
   let dep = req.body;
-  const db = await connectDB();
-  const collection = await db.collection("departments");
-  await collection.insertOne(dep);
+  const department = new Department(dep);
+  await department.save();
   res.status(201).json({ message: "Add successfully", DepInfor: dep });
 });
 
 server.use((err, req, res, next) => {
   res.status(400).json({ error: err });
 });
+
+
 
 //-----------------------------------------------------------------------------------
 //Practice:
@@ -197,15 +246,16 @@ server.use((err, req, res, next) => {
 //4. Tạo API PUT:/employees/:id -- >Update employees theo id, có middleware check id ton tại
 //5. Tạo API GET: /employees/: keyword -- > Search employee theo name dua vao keyword
 
+
+
+
 // GET /worksons/:hour
 // Tìm worksons có workHours >= hour
 // Hiển thị: id, empId, empName, proId, proName, workHours
 
 server.get("/worksons/:hour", async (req, res) => {
   const hour = Number(req.params.hour);
-  const db = await connectDB();
-  const data = await db
-    .collection("worksons")
+  const data = await Workson
     .aggregate([
       {
         $match: {
@@ -247,7 +297,7 @@ server.get("/worksons/:hour", async (req, res) => {
         },
       },
     ])
-    .toArray();
+    
 
   res.status(200).json(data);
 });
@@ -259,33 +309,34 @@ const checkEmployeeInput = (req, res, next) => {
   const { salary, dob } = req.body;
 
   if (isNaN(Number(salary))) {
-    return res.status(400).json({
-      error: "Salary phai la kieu so!",
-    });
+    return next("Salary phai la kieu so!");
   }
 
   if (isNaN(Date.parse(dob))) {
-    return res.status(400).json({
-      error: "Dob phai la kieu date!",
-    });
+    return next("Dob phai la kieu date!");
   }
 
   next();
 };
+
 server.post("/employees", checkEmployeeInput, async (req, res) => {
-  const employee = req.body;
+  let emp = req.body;
 
-  employee.salary = Number(employee.salary);
+  emp.salary = Number(emp.salary);
+  emp.dob = new Date(emp.dob);
 
-  const db = await connectDB();
-  const collection = db.collection("employees");
-
-  const result = await collection.insertOne(employee);
+  const employee = new Employee(emp);
+  await employee.save();
 
   res.status(201).json({
     message: "Add employee successfully",
-    insertedId: result.insertedId,
-    employee: employee,
+    EmpInfor: emp,
+  });
+});
+
+server.use((err, req, res, next) => {
+  res.status(400).json({
+    error: err,
   });
 });
 
@@ -294,124 +345,79 @@ server.post("/employees", checkEmployeeInput, async (req, res) => {
 // Bạn nhớ import ObjectId từ thư viện mongodb ở đầu file nhé
 
 const checkEmployeeId = async (req, res, next) => {
-  try {
-    const id = req.params.id.trim();
+  const id = req.params.id;
 
-    // 1. Kiểm tra xem id truyền lên có đúng định dạng 24 ký tự hex của MongoDB không
-    if (!ObjectId.isValid(id)) {
-      return res.status(400).json({
-        error: "Định dạng ID không hợp lệ!",
-      });
-    }
-
-    const db = await connectDB();
-    const collection = db.collection("employees");
-
-    // 2. Query trực tiếp dưới DB giống Mongo Shell
-    const employee = await collection.findOne({ _id: new ObjectId(id) });
-
-    if (!employee) {
-      return res.status(404).json({
-        error: "Employee không tồn tại!",
-      });
-    }
-
-    req.employee = employee;
-    next();
-  } catch (error) {
-    next(error);
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return next("ID khong hop le!");
   }
+
+  const employee = await Employee.findById(id);
+
+  if (!employee) {
+    return next("Employee khong ton tai!");
+  }
+
+  req.employee = employee;
+  next();
 };
 
-server.delete("/employees/:id", checkEmployeeId, async (req, res, next) => {
-  try {
-    const db = await connectDB();
-    const collection = db.collection("employees");
+server.delete("/employees/:id", checkEmployeeId, async (req, res) => {
+  await Employee.findByIdAndDelete(req.params.id);
 
-    // Lệnh deleteOne này của bạn đã ổn rồi, req.employee._id hiện tại đang là 1 Object
-    await collection.deleteOne({ _id: req.employee._id });
-
-    res.status(200).json({
-      message: "Delete employee successfully",
-      deletedEmployee: req.employee,
-    });
-  } catch (error) {
-    next(error);
-  }
+  res.status(200).json({
+    message: "Delete employee successfully",
+    deletedEmployee: req.employee,
+  });
 });
+
+
 
 // Middleware check id ton tai
 // Middleware check id ton tai
 const checkEmployeeIdU = async (req, res, next) => {
-  try {
-    const id = req.params.id.trim();
+  const id = req.params.id;
 
-    // 1. Kiểm tra xem id truyền lên có đúng định dạng 24 ký tự hex của MongoDB không
-    if (!ObjectId.isValid(id)) {
-      return res.status(400).json({
-        error: "Định dạng ID không hợp lệ!",
-      });
-    }
-
-    const db = await connectDB();
-    const collection = db.collection("employees");
-
-    // 2. Query trực tiếp dưới DB giống Mongo Shell
-    const employee = await collection.findOne({ _id: new ObjectId(id) });
-
-    if (!employee) {
-      return res.status(404).json({
-        error: "Employee không tồn tại!",
-      });
-    }
-
-    req.employee = employee;
-    next();
-  } catch (error) {
-    next(error);
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return next("ID khong hop le!");
   }
+
+  const employee = await Employee.findById(id);
+
+  if (!employee) {
+    return next("Employee khong ton tai!");
+  }
+
+  req.employee = employee;
+  next();
 };
 
-// PUT /employees/:id
-server.put("/employees/:id", checkEmployeeIdU, async (req, res, next) => {
-  try {
-    const db = await connectDB();
-    const collection = db.collection("employees");
+server.put("/employees/:id", checkEmployeeIdU, async (req, res) => {
+  const { name, salary, gender, dob, depId } = req.body;
 
-    const { name, salary, gender, dob, depId } = req.body;
-
-    // Xử lý depId an toàn hơn một chút
-    let formattedDepId = depId;
-    if (depId && ObjectId.isValid(depId)) {
-      formattedDepId = new ObjectId(depId);
+  const employee = await Employee.findByIdAndUpdate(
+    req.params.id,
+    {
+      name,
+      salary: Number(salary),
+      gender,
+      dob: new Date(dob),
+      depId,
+    },
+    {
+      new: true, // trả về document sau khi update
     }
+  );
 
-    // Dùng luôn req.employee._id từ middleware, không cần parse lại từ req.params.id
-    await collection.updateOne(
-      { _id: req.employee._id },
-      {
-        $set: {
-          name,
-          salary,
-          gender,
-          dob,
-          depId: formattedDepId,
-        },
-      },
-    );
+  res.status(200).json({
+    message: "Update employee successfully",
+    employee,
+  });
+});
 
-    // Lấy lại data sau khi update
-    const updatedEmployee = await collection.findOne({
-      _id: req.employee._id,
-    });
-
-    res.status(200).json({
-      message: "Update employee successfully",
-      employee: updatedEmployee,
-    });
-  } catch (error) {
-    next(error);
-  }
+server.use((err, req, res, next) => {
+  res.status(400).json({
+    error: err,
+  });
 });
 
 //5. Tạo API GET: /employees/: keyword -- > Search employee theo name dua vao keyword
@@ -420,17 +426,15 @@ server.get("/employees/:keyword", async (req, res, next) => {
   try {
     const keyword = req.params.keyword;
 
-    const db = await connectDB();
-    const collection = db.collection("employees");
-
-    const employees = await collection
-      .find({
-        name: { $regex: keyword, $options: "i" },
-      })
-      .toArray();
+    const employees = await Employee.find({
+      name: {
+        $regex: keyword,
+        $options: "i",
+      },
+    });
 
     res.status(200).json({
-      message: "Tìm kiếm thành công!",
+      message: "Tim kiem thanh cong!",
       total: employees.length,
       data: employees,
     });
